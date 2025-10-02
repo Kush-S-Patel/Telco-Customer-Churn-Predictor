@@ -68,6 +68,8 @@ The dataset contains anonymized information about telecom customers, including d
 | `MonthlyCharges`     | Monthly amount charged to the customer                                     |
 | `TotalCharges`       | Total amount charged to the customer to date                               |
 | `Churn`             | Target variable — whether the customer churned (Yes = churned, No = active) |
+<img width="600" height="666" alt="Heatmap" src="https://github.com/user-attachments/assets/fc3a55d6-1022-41c8-87ef-e2f1c065e8ca" />
+
 
 > You can use your own dataset or download the [Telco Customer Churn dataset](https://www.kaggle.com/blastchar/telco-customer-churn) from Kaggle.
 
