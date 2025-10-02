@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 
 df = pd.read_csv("data/data.csv")
 
+
 if 'customerID' in df.columns:
     df = df.drop(columns=['customerID'])
 
