@@ -17,7 +17,7 @@ from sklearn.preprocessing import LabelEncoder
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("data.csv")
+df = pd.read_csv("data/data.csv")
 
 if 'customerID' in df.columns:
     df = df.drop(columns=['customerID'])
@@ -25,8 +25,8 @@ if 'customerID' in df.columns:
 
 df['Churn'] = df['Churn'].map({'Yes': True, 'No': False})
 
-cols_le = ['gender', 'Partner', 'Dependents', 'PhoneService', 'MultipleLines', 'InternetService', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 'Contract', 'PaperlessBilling', 'PaymentMethod']
-cols_numeric = ['SeniorCitizen', 'tenure', 'MonthlyCharges', 'TotalCharges']
+cols_le = ['gender', 'SeniorCitizen', 'Partner', 'Dependents', 'PhoneService', 'MultipleLines', 'InternetService', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 'Contract', 'PaperlessBilling', 'PaymentMethod']
+cols_numeric = ['tenure', 'MonthlyCharges', 'TotalCharges']
 
 # drop_cols = ['gender', 'TotalCharges', 'PhoneService', 'StreamingTV', 'StreamingMovies', 'InternetService']
 
@@ -50,6 +50,8 @@ plt.figure(figsize=(6, len(correlations)/3))
 sns.heatmap(correlations.to_frame(), annot=True, cmap='coolwarm', center=0)
 plt.title("Correlation of All Features with Churn")
 plt.show()
+
+
 
 print(df_copy['TotalCharges'].describe())
 plt.figure(figsize=(9, 8))
@@ -97,6 +99,16 @@ y = df_encoded['Churn']
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
+
+#Horizontal boxplots for each numerical column
+for i, column in enumerate(cols_numeric):
+    plt.subplot(3, 3, i+1)
+    sns.boxplot(y=X_train[column])
+    plt.title(column)
+
+
+plt.tight_layout()
+plt.show()
 
 rf = RandomForestClassifier(n_estimators=500,
     max_depth=12,
