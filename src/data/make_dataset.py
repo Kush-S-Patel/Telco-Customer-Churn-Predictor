@@ -9,7 +9,6 @@ def preprocess_data():
     df = pd.read_csv(input_path)
 
     print("Original Data Shape:", df.shape)
-    # Drop ID column
     if "customerID" in df.columns:
         df = df.drop(columns=["customerID"])
 
@@ -21,11 +20,9 @@ def preprocess_data():
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    # Target: Churn -> 0/1
     if "Churn" in df.columns:
         df["Churn"] = df["Churn"].map({"No": 0, "Yes": 1})
 
-    # One-hot encode categoricals (keep numeric as-is)
     X = df.drop(columns=["Churn"]) if "Churn" in df.columns else df
     y = df["Churn"] if "Churn" in df.columns else None
 
