@@ -126,28 +126,4 @@ cd churn-prediction
 pip install -r requirements.txt
 ```
 
-## 🚀 Future Work
 
-- [ ] Add model monitoring for production data  
-- [ ] Deploy a real-time API endpoint for predictions  
-- [ ] Automate retraining pipelines  
-- [ ] Experiment with deep learning models (e.g., TabNet, NN)
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**.  
-See the [LICENSE](./LICENSE) file for more information.
-
----
-
-## ✨ Acknowledgments
-
-- [Kaggle Telco Churn Dataset](https://www.kaggle.com/blastchar/telco-customer-churn)  
-- scikit-learn, pandas, matplotlib, seaborn  
-- XGBoost, Streamlit, Flask
-
----
-
-Made with ❤️ by [Your Name](https://github.com/your-username)
