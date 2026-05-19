@@ -148,10 +148,6 @@ Full metrics: `reports/metrics/all_models_test.json`
 
 ---
 
-## License
-
-MIT License — see [LICENSE](LICENSE) if present.
-
 ## Acknowledgments
 
 - [Kaggle Telco Customer Churn](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)  
