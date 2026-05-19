@@ -1,0 +1,18 @@
+{
+  "logistic_regression": {
+    "mean_roc_auc": 0.808337031157118,
+    "std_roc_auc": 0.013678728537431567
+  },
+  "random_forest": {
+    "mean_roc_auc": 0.8437192470345758,
+    "std_roc_auc": 0.008238759544668165
+  },
+  "gradient_boosting": {
+    "mean_roc_auc": 0.8343642026940007,
+    "std_roc_auc": 0.008625094389060355
+  },
+  "xgboost": {
+    "mean_roc_auc": 0.8374784521541653,
+    "std_roc_auc": 0.007729680401112482
+  }
+}

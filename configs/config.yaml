@@ -1,0 +1,11 @@
+# Telco churn prediction configuration
+random_state: 42
+test_size: 0.2
+target_column: Churn
+
+paths:
+  raw_data: data/raw/data.csv
+  processed_data: data/processed/cleaned.csv
+  models_dir: models/
+  figures_dir: reports/figures/
+  metrics_dir: reports/metrics/

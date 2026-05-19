@@ -1,153 +1,158 @@
-# 🧠 Telco Customer Churn Prediction Model
+# Telco Customer Churn Prediction
 
-A machine learning project designed to **predict customer churn** using data science techniques.  
-This repository demonstrates the full ML lifecycle — from data exploration and feature engineering to model training, evaluation, and optional deployment.
+End-to-end machine learning project to **predict telecom customer churn** from subscription, billing, and service data. Includes reproducible preprocessing, multi-model training, cross-validated evaluation, saved artifacts, and analysis notebooks.
 
----
-
-## 📌 Table of Contents
-
-- [Overview](#-overview)
-- [Project Structure](#-project-structure)
-- [Dataset](#-dataset)
-- [Approach](#-approach)
-- [Model Performance](#-model-performance)
-- [Installation](#-installation)
-- [Future Work](#-future-work)
-- [License](#-license)
+![Model comparison](reports/figures/model_comparison.png)
 
 ---
 
-## 📖 Overview
+## Highlights
 
-**Customer churn** is a large focus of businesses, especially subscription-based services.
-By knowing exactly what causes churn in existing customers, companies can reduce marketing and acquistion costs, retain valuable customers, and improve customer satisfaction with targeted retention efforts.
-This project builds and evaluates several classification models to **identify customers at risk of churning**, using historical data.
+| Metric (test set, champion) | Value |
+|------------------------------|------:|
+| **Model** | Random Forest |
+| **ROC-AUC** | 0.841 |
+| **PR-AUC** | 0.648 |
+| **F1 (churn class, tuned threshold)** | 0.643 |
+| **Recall (churn)** | 0.807 |
+| **5-fold CV ROC-AUC** | 0.844 ± 0.008 |
+
+The pipeline optimizes the decision threshold on the validation split to balance precision and recall for the minority churn class (~26.5% of customers).
 
 ---
 
-## 🧱 Project Structure
+## Project structure
 
 ```
-.
+Telco-Customer-Churn-Predictor/
+├── configs/
+│   └── config.yaml              # Paths and training settings
 ├── data/
-│   └── data.csv                # Original dataset(s)
+│   ├── raw/data.csv             # Original Kaggle-style telco data
+│   └── processed/cleaned.csv    # One-hot encoded features + Churn
+├── notebooks/
+│   ├── 01-eda.ipynb
+│   ├── 02-feature_engineering.ipynb
+│   ├── 03-modeling.ipynb
+│   └── 04-evaluation.ipynb
+├── reports/
+│   ├── figures/                 # EDA + model evaluation plots
+│   └── metrics/                 # JSON metrics and CV scores
+├── models/                      # Serialized estimators + champion bundle
+├── scripts/
+│   ├── train.py                 # Full training pipeline
+│   ├── generate_eda.py          # EDA figures only
+│   ├── predict.py               # CLI scoring
+│   └── build_notebooks.py       # Regenerate notebook templates
 ├── src/
-│   ├── __init__.py
-│   └── main.py
-├── requirements.txt
-└── README.md
+│   ├── config.py
+│   ├── data/make_dataset.py
+│   ├── features/preprocess.py
+│   ├── models/train.py, predict.py
+│   ├── evaluation/metrics.py
+│   └── visualization/plots.py
+└── requirements.txt
 ```
 
 ---
 
-## 🧪 Dataset
+## Dataset
 
-The dataset contains anonymized information about telecom customers, including demographics, subscribed services, billing details, and whether they churned.
+- **Source:** [Telco Customer Churn (Kaggle)](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)
+- **Rows:** 7,043 customers (after cleaning)
+- **Target:** `Churn` (0 = stayed, 1 = churned)
+- **Features:** 45 encoded inputs (numeric + one-hot categoricals)
 
-| Feature              | Description                                                                 |
-|-----------------------|-----------------------------------------------------------------------------|
-| `customerID`         | Unique customer identifier                                                  |
-| `gender`             | Gender of the customer                                                      |
-| `SeniorCitizen`      | Whether the customer is a senior citizen (1 = Yes, 0 = No)                   |
-| `Partner`            | Whether the customer has a partner (Yes/No)                                 |
-| `Dependents`         | Whether the customer has dependents (Yes/No)                                |
-| `tenure`             | Number of months the customer has stayed with the company                   |
-| `PhoneService`       | Whether the customer has phone service (Yes/No)                             |
-| `MultipleLines`      | Whether the customer has multiple lines                                     |
-| `InternetService`    | Type of internet service (DSL, Fiber optic, None)                           |
-| `OnlineSecurity`     | Whether the customer has online security service                            |
-| `OnlineBackup`       | Whether the customer has online backup service                              |
-| `DeviceProtection`   | Whether the customer has device protection                                  |
-| `TechSupport`        | Whether the customer has technical support                                  |
-| `StreamingTV`        | Whether the customer has streaming TV service                               |
-| `StreamingMovies`    | Whether the customer has streaming movies service                           |
-| `Contract`          | Type of contract (Month-to-month, One year, Two year)                        |
-| `PaperlessBilling`   | Whether the customer uses paperless billing (Yes/No)                        |
-| `PaymentMethod`      | Method of payment (e.g., Electronic check, Credit card, Bank transfer)      |
-| `MonthlyCharges`     | Monthly amount charged to the customer                                     |
-| `TotalCharges`       | Total amount charged to the customer to date                               |
-| `Churn`             | Target variable — whether the customer churned (Yes = churned, No = active) |
-<img width="600" height="666" alt="Heatmap" src="https://github.com/user-attachments/assets/fc3a55d6-1022-41c8-87ef-e2f1c065e8ca" />
+Key business drivers observed in EDA:
 
-
-> You can use your own dataset or download the [Telco Customer Churn dataset](https://www.kaggle.com/blastchar/telco-customer-churn) from Kaggle.
+- Short **tenure** and **month-to-month** contracts correlate with churn
+- **Fiber optic** and **electronic check** payment segments show higher churn rates
+- Long-tenure customers on **two-year** contracts rarely churn
 
 ---
 
-## 🧠 Approach
-
-1. **Exploratory Data Analysis (EDA)**  
-   - Inspected distributions and descriptive statistics for numerical features (`tenure`, `MonthlyCharges`, `TotalCharges`).  
-   - Plotted feature correlations with `Churn` to identify the strongest predictors.  
-   - Detected and removed outliers using Z-scores.  
-
-2. **Feature Engineering**  
-   - Encoded categorical features using `LabelEncoder` and one-hot encoding for model compatibility.  
-   - Converted numerical columns to proper numeric types and interpolated missing values.  
-   - Cleaned categorical missing values with forward/backward filling.  
-   - Removed extreme outliers (`|z| > 3`) to stabilize model training.  
-
-3. **Modeling**  
-   - Split the data into train (80%) and test (20%) sets.  
-   - Trained multiple algorithms:  
-     - **Random Forest** (tuned with deeper trees and leaf constraints)  
-     - **Linear Regression** (as a baseline)  
-     - **XGBoost Classifier**  
-     - **Gradient Boosting Classifier**  
-   - Compared performance across models using accuracy and regression metrics where applicable.  
-
-4. **Evaluation**  
-   - **Metrics:** Accuracy, Mean Squared Error (for Linear model), R² Score.  
-   - Focused on model accuracy for churn classification.  
-   - Random Forest and Gradient Boosting achieved the highest performance on the test set.
-   
----
-
-## 📈 Model Performance
-
-| Model                      | Train Accuracy | Test Accuracy | MSE   | R²   |
-|----------------------------|---------------:|-------------:|------:|-----:|
-| **Random Forest**          | 0.8912        | 0.8062      |   —   |  —   |
-| **Linear Regression**      | —             | —           | 0.13  | 0.31 |
-| **XGBoost Classifier**     | —             | 0.7842      |   —   |  —   |
-| **Gradient Boosting**      | 0.8268        | 0.8077      |   —   |  —   |
-
-> Random Forest and Gradient Boosting achieved the highest test accuracy (~80.7%), making them the most effective models for predicting customer churn in this dataset.
-
-
-## 🛠 Installation
-
-Clone the repository and install dependencies:
+## Quick start
 
 ```bash
-git clone https://github.com/Kush-S-Patel/churn-prediction.git
-cd churn-prediction
+# Clone and install
+git clone <your-repo-url>
+cd Telco-Customer-Churn-Predictor
 pip install -r requirements.txt
+
+# Generate EDA figures
+python scripts/generate_eda.py
+
+# Train models + evaluation figures + metrics
+python scripts/train.py
+
+# Score customers (processed CSV)
+python scripts/predict.py data/processed/cleaned.csv
 ```
 
-## 🚀 Future Work
+### Notebooks
 
-- [ ] Add model monitoring for production data  
-- [ ] Deploy a real-time API endpoint for predictions  
-- [ ] Automate retraining pipelines  
-- [ ] Experiment with deep learning models (e.g., TabNet, NN)
+Run in order from the project root (or ensure `notebooks/` sets `ROOT` to parent):
 
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**.  
-See the [LICENSE](./LICENSE) file for more information.
+1. **01-eda** — distributions, churn rates, correlations  
+2. **02-feature_engineering** — preprocessing and stratified split  
+3. **03-modeling** — trains all models and saves `models/`  
+4. **04-evaluation** — metrics tables and figure gallery  
 
 ---
 
-## ✨ Acknowledgments
+## Approach
 
-- [Kaggle Telco Churn Dataset](https://www.kaggle.com/blastchar/telco-customer-churn)  
-- scikit-learn, pandas, matplotlib, seaborn  
-- XGBoost, Streamlit, Flask
+1. **Preprocessing** — Drop `customerID`, coerce numerics, impute missing `TotalCharges`, map churn to 0/1, one-hot encode categoricals (`src/data/make_dataset.py`).
+2. **Modeling** — Logistic regression, random forest, gradient boosting, XGBoost with class imbalance handling (`src/models/train.py`).
+3. **Evaluation** — ROC/PR curves, confusion matrix, calibration plot, learning curve, 5-fold CV ROC-AUC (`reports/`).
+4. **Deployment-ready artifacts** — `models/champion_bundle.joblib` stores the model, feature list, and optimal threshold for inference.
 
 ---
 
-Made with ❤️ by [Your Name](https://github.com/your-username)
+## Reports and figures
+
+| Figure | Description |
+|--------|-------------|
+| `eda_churn_distribution.png` | Class balance |
+| `eda_numerical_boxplots.png` | Tenure, charges vs churn |
+| `eda_categorical_churn_rates.png` | Churn rate by contract, internet, payment |
+| `eda_correlation_heatmap.png` | Top feature correlations |
+| `roc_curves.png` / `pr_curves.png` | Model discrimination |
+| `model_comparison.png` | ROC-AUC, F1, recall bar chart |
+| `confusion_matrix_champion.png` | Tuned classifier confusion matrix |
+| `feature_importance.png` | Top drivers (champion model) |
+| `learning_curve.png` | Bias/variance check (5-fold CV) |
+| `calibration_champion.png` | Probability calibration |
+
+---
+
+## Model comparison (test set)
+
+| Model | ROC-AUC | F1 | Recall (churn) |
+|-------|--------:|---:|---------------:|
+| Logistic regression | 0.842 | 0.618 | 0.786 |
+| **Random forest (champion)** | **0.841** | **0.643** | **0.807** |
+| XGBoost | 0.833 | 0.623 | 0.749 |
+| Gradient boosting | 0.827 | 0.556 | 0.505 |
+
+Full metrics: `reports/metrics/all_models_test.json`
+
+---
+
+## Future work
+
+- [ ] FastAPI / Streamlit serving layer  
+- [ ] MLflow experiment tracking  
+- [ ] Scheduled retraining on fresh data  
+- [ ] SHAP explanations for account managers  
+
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE) if present.
+
+## Acknowledgments
+
+- [Kaggle Telco Customer Churn](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)  
+- scikit-learn, XGBoost, pandas, matplotlib, seaborn

@@ -1,0 +1,7 @@
+{
+  "champion": "random_forest",
+  "threshold": 0.43000000000000005,
+  "n_features": 45,
+  "train_size": 5634,
+  "test_size": 1409
+}
